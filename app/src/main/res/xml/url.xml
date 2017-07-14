@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<url xmlns:android="http://schemas.android.com/apk/res/android">
+    <Node
+        Expires="30000"
+        Key="getWeatherInfo"
+        NetType="GET"
+        Url="http://www.weather.com.cn/data/sk/101010100.html" />
+    <Node
+        Expires="300"
+        Key="login"
+        NetType="POST"
+        Url="http://www.weather.com.cn/data/login.api" />
+</url>
