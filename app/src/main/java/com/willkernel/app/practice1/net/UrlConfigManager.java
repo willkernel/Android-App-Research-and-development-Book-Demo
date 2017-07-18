@@ -45,6 +45,7 @@ class UrlConfigManager {
                             urlData.netType = xmlResourceParser.getAttributeValue(null, "NetType");
                             urlData.expires = Long.parseLong(xmlResourceParser.getAttributeValue(null, "Expires"));
                             urlData.url = xmlResourceParser.getAttributeValue(null, "Url");
+                            urlData.mockClass = xmlResourceParser.getAttributeValue(null, "MockClass");
                             urlDatas.add(urlData);
                         }
                         break;

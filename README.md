@@ -1,8 +1,8 @@
 # Practice
 
 
-1. AndroidLib
-业务无关公用代码
+####AndroidLib
+1.业务无关公用代码
 activity BaseActivity，公用逻辑
 net 网络层
 cache 缓存数据，图片相关处理
@@ -37,10 +37,10 @@ convertInt(Object value,int default);
 substring(),长度不够，崩溃。判断是否越界，ex: ength>1
 
 
-
-抛弃AsyncTask，自定义网络底层封装框架
-设计一套App缓存策略
-设计一套MockService，模拟网络返回数据
+####简单网络框架
+抛弃AsyncTask，自定义网络底层封装框架<br>
+设计一套App缓存策略<br>
+设计一套MockService，模拟网络返回数据<br>
 封装用户Cookie逻辑
 
 1.JSON返回Response公用属性，可封装一个基类
@@ -48,14 +48,25 @@ substring(),长度不够，崩溃。判断是否越界，ex: ength>1
 
 使用原生ThreadPoolExecutor+Runnable+Handler
 
-网络底层优化
-1.onFail统一处理
-2.UrlConfigManager优化
-3.不是每个请求都需要回调的
+####网络底层优化
+1.onFail统一处理<br>
+2.UrlConfigManager优化<br>
+3.不是每个请求都需要回调的<br>
 4.ProgressBar 的处理
 
 
-数据缓存处理
-保存在SD卡，数据库中
-POST请求，GET 请求，请求URL作为键值，排序算法对URL中的key进行排序，检查是否有缓存数据，没有直接获取
+####数据缓存处理
+保存在SD卡，数据库中<br>
+POST请求，GET请求，请求URL作为键值，排序算法对URL中的key进行排序，检查是否有缓存数据，没有直接获取.
 如果有缓存数据，与缓存数据的Expired,Version比较是否需要更新
+
+####MockClass
+1.url.xml 中配置Node节点MockClass 属性，指定使用Mock子类生成的数据
+MockClass="con.xxx.xxx.MockWeatherInfo"<br>
+2.使用反射工厂设计MockService，MockService是基类，有抽象方法，getJsonData(),返回手动生成的数据
+```java
+public abstract class MockService{
+    public abstract String getJsonData();
+}
+```
+3.实现反射机制

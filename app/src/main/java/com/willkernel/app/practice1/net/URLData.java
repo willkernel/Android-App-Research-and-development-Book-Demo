@@ -10,6 +10,7 @@ public class URLData {
     public long expires;
     public String netType;
     public String url;
+    public String mockClass;
 
     @Override
     public String toString() {
@@ -18,6 +19,7 @@ public class URLData {
                 ", expires=" + expires +
                 ", netType='" + netType + '\'' +
                 ", url='" + url + '\'' +
+                ", mockClass='" + mockClass + '\'' +
                 '}';
     }
 }

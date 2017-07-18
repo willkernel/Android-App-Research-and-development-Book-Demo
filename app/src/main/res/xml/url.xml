@@ -4,6 +4,7 @@
         Expires="30000"
         Key="getWeatherInfo"
         NetType="GET"
+        MockClass="com.willkernel.app.practice1.entity.MockWeatherInfo"
         Url="http://www.weather.com.cn/data/sk/101010100.html" />
     <Node
         Expires="300"
