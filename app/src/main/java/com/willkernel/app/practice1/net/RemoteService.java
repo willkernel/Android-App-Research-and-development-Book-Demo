@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.util.Log;
 
 import com.alibaba.fastjson.JSON;
-import com.willkernel.app.practice1.entity.MockService;
+import com.willkernel.app.practice1.mockdata.MockService;
 import com.willkernel.app.practice1.net.response.Response;
 
 import java.util.ArrayList;

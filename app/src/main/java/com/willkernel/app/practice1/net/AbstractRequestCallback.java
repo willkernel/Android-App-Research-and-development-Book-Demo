@@ -14,4 +14,9 @@ public abstract class AbstractRequestCallback implements RequestCallback{
     public void onFail(String errorMessage) {
         Log.e("onFail",errorMessage);
     }
+
+    @Override
+    public void onCookieExpired() {
+
+    }
 }

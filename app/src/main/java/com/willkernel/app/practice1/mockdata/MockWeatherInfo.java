@@ -1,6 +1,7 @@
-package com.willkernel.app.practice1.entity;
+package com.willkernel.app.practice1.mockdata;
 
 import com.alibaba.fastjson.JSON;
+import com.willkernel.app.practice1.entity.Weather;
 import com.willkernel.app.practice1.net.response.Response;
 
 /**
@@ -19,13 +20,5 @@ public class MockWeatherInfo extends MockService {
         Response response = getSuccessResponse();
         response.result = JSON.toJSONString(weather);
         return JSON.toJSONString(response);
-    }
-
-    private Response getSuccessResponse() {
-        Response response = new Response();
-        response.hasError = false;
-        response.errorType = 0;
-        response.errorMessage = "";
-        return response;
     }
 }

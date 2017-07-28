@@ -8,4 +8,5 @@ package com.willkernel.app.practice1.net;
 public interface RequestCallback {
     void onSuccess(String content);
     void onFail(String errorMessage);
+    void onCookieExpired();
 }

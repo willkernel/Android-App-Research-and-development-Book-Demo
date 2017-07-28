@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<url xmlns:android="http://schemas.android.com/apk/res/android">
+<url>
     <Node
         Expires="30000"
         Key="getWeatherInfo"
         NetType="GET"
-        MockClass="com.willkernel.app.practice1.entity.MockWeatherInfo"
+        MockClass="com.willkernel.app.practice1.mockdata.MockLoginSuccessInfo"
         Url="http://www.weather.com.cn/data/sk/101010100.html" />
+        <!--MockClass="com.willkernel.app.practice1.mockdata.MockWeatherInfo"-->
     <Node
         Expires="300"
         Key="login"

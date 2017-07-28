@@ -2,12 +2,16 @@ package com.willkernel.app.practice1.activity;
 
 import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 
 import com.alibaba.fastjson.JSON;
@@ -19,6 +23,7 @@ import com.willkernel.app.practice1.net.RequestCallback;
 import com.willkernel.app.practice1.net.RequestManager;
 import com.willkernel.app.practice1.net.RequestParameter;
 import com.willkernel.app.practice1.net.request.RequestAsyncTask;
+import com.willkernel.app.practice1.utils.User;
 
 import java.util.ArrayList;
 
@@ -27,16 +32,40 @@ public class MainActivity extends AppCompatActivity {
     private RequestManager requestManager;
     private ProgressDialog progressDialog;
     private TextView text;
+    private User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        user = User.getInstance(this);
         text = (TextView) findViewById(R.id.text);
         requestManager = new RequestManager();
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("loading...");
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 100);
+        loginBtn();
+    }
+
+    private void loginBtn() {
+        findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (user.isLogin()) {
+                    go2News();
+                } else {
+                    go2Login();
+                }
+            }
+
+            private void go2Login() {
+                startActivityForResult(new Intent(MainActivity.this, LoginActivity.class).putExtra("callback", true), 100);
+            }
+
+            private void go2News() {
+
+            }
+        });
     }
 
     private void loadData2() {
@@ -56,6 +85,17 @@ public class MainActivity extends AppCompatActivity {
                 super.onFail(errorMessage);
                 progressDialog.dismiss();
                 //做其他处理
+            }
+
+            @Override
+            public void onCookieExpired() {
+                progressDialog.dismiss();
+                new AlertDialog.Builder(MainActivity.this).setTitle("Error").setMessage("Cookie expired,login again").setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        startActivity(new Intent(MainActivity.this,LoginActivity.class).putExtra("callback",true));
+                    }
+                }).show();
             }
         };
         ArrayList<RequestParameter> parameters = new ArrayList<>();
@@ -97,6 +137,15 @@ public class MainActivity extends AppCompatActivity {
                     loadData2();
                 }
             }, 2000);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (resultCode){
+            case RESULT_OK:
+                break;
         }
     }
 
