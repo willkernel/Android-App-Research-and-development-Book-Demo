@@ -1,9 +1,9 @@
-package com.willkernel.app.practice1.net;
+package com.willkernel.app.wklib.net;
 
-import android.app.Activity;
+import android.app.Application;
 import android.content.res.XmlResourceParser;
 
-import com.willkernel.app.practice1.R;
+import com.willkernel.app.wklib.entity.URLData;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -17,11 +17,13 @@ import java.util.List;
  * mail:willkerneljc@gmail.com
  */
 
-class UrlConfigManager {
+public class UrlConfigManager {
     private static List<URLData> urlDatas;
+    private static int xmlId;
 
-    static URLData findURL(Activity activity, String key) {
-        if (urlDatas == null || urlDatas.isEmpty()) findURLFromXml(activity);
+    public static URLData findURL(Application application, String key) {
+        if (xmlId == 0) return null;
+        if (urlDatas == null || urlDatas.isEmpty()) findURLFromXml(application, xmlId);
         for (URLData urlData : urlDatas) {
             if (key.equals(urlData.key))
                 return urlData;
@@ -29,9 +31,10 @@ class UrlConfigManager {
         return null;
     }
 
-    private static URLData findURLFromXml(Activity activity) {
-        urlDatas=new ArrayList<>();
-        XmlResourceParser xmlResourceParser = activity.getApplication().getResources().getXml(R.xml.url);
+    public static List<URLData> findURLFromXml(Application application, int xml) {
+        xmlId = xml;
+        urlDatas = new ArrayList<>();
+        XmlResourceParser xmlResourceParser = application.getResources().getXml(xml);
         try {
             int eventCode = xmlResourceParser.getEventType();
             while (eventCode != XmlPullParser.END_DOCUMENT) {
@@ -54,14 +57,16 @@ class UrlConfigManager {
                 }
                 eventCode = xmlResourceParser.next();
             }
+            return urlDatas;
         } catch (XmlPullParserException | IOException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    static URLData findURLFromXml(Activity activity, String findKey) {
-        XmlResourceParser xmlResourceParser = activity.getApplication().getResources().getXml(R.xml.url);
+    public static URLData findURLFromXml(Application application, String findKey) {
+        if (xmlId == 0) return null;
+        XmlResourceParser xmlResourceParser = application.getResources().getXml(xmlId);
         try {
             int eventCode = xmlResourceParser.getEventType();
             while (eventCode != XmlPullParser.END_DOCUMENT) {

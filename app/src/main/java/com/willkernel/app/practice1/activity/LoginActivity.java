@@ -1,12 +1,9 @@
 package com.willkernel.app.practice1.activity;
 
 import android.content.Intent;
-import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 
-import com.willkernel.app.practice1.net.AbstractRequestCallback;
-import com.willkernel.app.practice1.net.RequestCallback;
+import com.willkernel.app.wklib.net.RequestCallback;
+
 
 /**
  * Created by willkernel on 2017/7/28.
@@ -15,14 +12,23 @@ import com.willkernel.app.practice1.net.RequestCallback;
  * 登录成功后保存cookie，加密序列化保存本地，请求时设置统一请求头
  */
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends BActivity {
     private boolean callback;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void initViews() {
         callback = getIntent().getBooleanExtra("callback", false);
         loginRequest();
+    }
+
+    @Override
+    protected int getLayoutId() {
+        return 0;
+    }
+
+    @Override
+    protected void setListeners() {
+
     }
 
     private void loginRequest() {

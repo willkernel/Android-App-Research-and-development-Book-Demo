@@ -1,4 +1,4 @@
-package com.willkernel.app.practice1.net;
+package com.willkernel.app.wklib.net;
 
 import android.os.Parcel;
 import android.os.Parcelable;

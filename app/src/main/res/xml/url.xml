@@ -4,9 +4,9 @@
         Expires="30000"
         Key="getWeatherInfo"
         NetType="GET"
-        MockClass="com.willkernel.app.practice1.mockdata.MockLoginSuccessInfo"
         Url="http://www.weather.com.cn/data/sk/101010100.html" />
         <!--MockClass="com.willkernel.app.practice1.mockdata.MockWeatherInfo"-->
+        <!--MockClass="com.willkernel.app.practice1.mockdata.MockLoginSuccessInfo"-->
     <Node
         Expires="300"
         Key="login"

@@ -1,4 +1,4 @@
-package com.willkernel.app.practice1.entity;
+package com.willkernel.app.wklib.entity;
 
 import android.os.Parcel;
 import android.os.Parcelable;

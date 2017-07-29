@@ -1,6 +1,8 @@
-package com.willkernel.app.practice1.net;
+package com.willkernel.app.wklib.net;
 
 import android.util.Log;
+
+import com.willkernel.app.wklib.entity.URLData;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;

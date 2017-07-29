@@ -1,11 +1,12 @@
-package com.willkernel.app.practice1.net;
+package com.willkernel.app.wklib.net;
 
-import android.app.Activity;
+import android.app.Application;
 import android.util.Log;
 
 import com.alibaba.fastjson.JSON;
-import com.willkernel.app.practice1.mockdata.MockService;
-import com.willkernel.app.practice1.net.response.Response;
+import com.willkernel.app.wklib.entity.URLData;
+import com.willkernel.app.wklib.mock.MockService;
+import com.willkernel.app.wklib.net.response.Response;
 
 import java.util.ArrayList;
 
@@ -29,12 +30,12 @@ public class RemoteService {
         return remoteService;
     }
 
-    public void invoke(Activity activity, RequestManager requestManager, String key, ArrayList<RequestParameter> parameters, RequestCallback callback, boolean update) {
-        URLData data = UrlConfigManager.findURL(activity, key);
+    public void invoke(Application application, RequestManager requestManager, String key, ArrayList<RequestParameter> parameters, RequestCallback callback, boolean update) {
+        URLData data = UrlConfigManager.findURL(application, key);
         if (data == null) return;
 
         if (data.mockClass != null) {//反射获取MockService类，获取本地模拟数据
-            Log.e(TAG, "data=" + data);
+            Log.e(TAG, "MockService data=" + data);
             try {
                 MockService mockService = (MockService) Class.forName(data.mockClass).newInstance();
                 String response = mockService.getJsonData();

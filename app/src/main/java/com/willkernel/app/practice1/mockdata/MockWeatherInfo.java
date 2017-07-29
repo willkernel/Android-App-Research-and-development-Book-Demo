@@ -1,8 +1,10 @@
 package com.willkernel.app.practice1.mockdata;
 
+
 import com.alibaba.fastjson.JSON;
 import com.willkernel.app.practice1.entity.Weather;
-import com.willkernel.app.practice1.net.response.Response;
+import com.willkernel.app.wklib.mock.MockService;
+import com.willkernel.app.wklib.net.response.Response;
 
 /**
  * Created by willkernel on 2017/7/18.

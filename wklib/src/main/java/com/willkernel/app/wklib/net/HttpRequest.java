@@ -1,12 +1,14 @@
-package com.willkernel.app.practice1.net;
+package com.willkernel.app.wklib.net;
 
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.willkernel.app.practice1.entity.CacheItem;
-import com.willkernel.app.practice1.net.response.Response;
-import com.willkernel.app.practice1.utils.MD5Util;
+import com.willkernel.app.wklib.cache.CacheManager;
+import com.willkernel.app.wklib.entity.CacheItem;
+import com.willkernel.app.wklib.entity.URLData;
+import com.willkernel.app.wklib.net.response.Response;
+import com.willkernel.app.wklib.utils.MD5Util;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -76,39 +78,45 @@ public class HttpRequest implements Runnable {
         httpURLConnection.setDoInput(true);
         httpURLConnection.setRequestProperty("Content-type", "application/x-java-serialized-object");
 
-        avoidRedirect(url);
-        avoidHack(url);
-        setCookie();
-
         //POST 不使用缓存
         httpURLConnection.setUseCaches(false);
+
         if (urlData.netType.equals("POST")) {
             httpURLConnection.setDoOutput(true);
         }
         for (RequestParameter parameter : parameters) {
             httpURLConnection.addRequestProperty(parameter.name, parameter.value);
         }
+
+        avoidRedirect(url);
+        avoidHack(url);
+        setCookie();
+
         InputStream inStrm = new BufferedInputStream(httpURLConnection.getInputStream());
         //无需回调
         if (requestCallback == null) return;
 
         response.result = inputStreamToString(inStrm);
-        if (TextUtils.isEmpty(response.result)) {
-            handleNetworkError("网络异常");
+        if (response.errorType == -2) {
+            requestCallback.onCookieExpired();
         } else {
-            response.errorMessage = "";
-            response.errorType = 0;
-            response.hasError = false;
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    HttpRequest.this.requestCallback
-                            .onSuccess(response.result);
-                    Log.e(TAG, "network=" + response.result);
+            if (TextUtils.isEmpty(response.result)) {
+                handleNetworkError("网络异常");
+            } else {
+                response.errorMessage = "";
+                response.errorType = 0;
+                response.hasError = false;
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        HttpRequest.this.requestCallback
+                                .onSuccess(response.result);
+                        Log.e(TAG, "network=" + response.result);
+                    }
+                });
+                if (urlData.netType.equals("GET") && urlData.expires > 0) {
+                    CacheManager.getInstance().putFileCache(urlData.url, response.result, urlData.expires);
                 }
-            });
-            if (urlData.netType.equals("GET") && urlData.expires > 0) {
-                CacheManager.getInstance().putFileCache(urlData.url, response.result, urlData.expires);
             }
         }
     }

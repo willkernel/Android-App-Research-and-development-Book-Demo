@@ -1,9 +1,10 @@
-package com.willkernel.app.practice1.net.request;
+package com.willkernel.app.wklib.net.request;
+
 
 import android.os.AsyncTask;
 import android.text.TextUtils;
 
-import com.willkernel.app.practice1.net.response.Response;
+import com.willkernel.app.wklib.net.response.Response;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;

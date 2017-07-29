@@ -1,11 +1,12 @@
-package com.willkernel.app.practice1.net;
+package com.willkernel.app.wklib.cache;
+
 
 import android.util.Log;
 
-import com.willkernel.app.practice1.CApp;
-import com.willkernel.app.practice1.entity.CacheItem;
-import com.willkernel.app.practice1.utils.FileUtil;
-import com.willkernel.app.practice1.utils.MD5Util;
+import com.willkernel.app.wklib.WKApp;
+import com.willkernel.app.wklib.entity.CacheItem;
+import com.willkernel.app.wklib.utils.FileUtil;
+import com.willkernel.app.wklib.utils.MD5Util;
 
 import java.io.File;
 
@@ -17,7 +18,7 @@ public class CacheManager {
     private static final String TAG = "CacheManager";
     private static final long SDCARD_MIN_SPACE = 1024 * 1024 * 10;
     private static CacheManager mInstance;
-    private String cachePath = (!FileUtil.isExternalStorageWritable() ? CApp.getInstance().getCacheDir() : CApp.getInstance().getExternalCacheDir()).getAbsolutePath() + "/data/";
+    private String cachePath = (!FileUtil.isExternalStorageWritable() ? WKApp.getInstance().getCacheDir() : WKApp.getInstance().getExternalCacheDir()).getAbsolutePath() + "/data/";
     private File cacheFile;
 
     public static CacheManager getInstance() {
@@ -27,7 +28,7 @@ public class CacheManager {
         return mInstance;
     }
 
-    void putFileCache(String url, String result, long expires) {
+    public void putFileCache(String url, String result, long expires) {
         String md5Key = MD5Util.md5(url);
         CacheItem cacheItem = new CacheItem(md5Key, result, expires);
         Log.e(TAG, "put2Cache  " + put2Cache(cacheItem));
@@ -41,7 +42,7 @@ public class CacheManager {
         return false;
     }
 
-    synchronized CacheItem getFromCache(String key) {
+    public synchronized CacheItem getFromCache(String key) {
         CacheItem findItem = (CacheItem) FileUtil.restoreObject(cachePath + key);
         if (findItem == null) return null;
         if (findItem.expires > System.currentTimeMillis()) return findItem;

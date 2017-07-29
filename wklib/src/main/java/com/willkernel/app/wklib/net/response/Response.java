@@ -1,4 +1,4 @@
-package com.willkernel.app.practice1.net.response;
+package com.willkernel.app.wklib.net.response;
 
 /**
  * Created by willkernel on 2017/7/11.

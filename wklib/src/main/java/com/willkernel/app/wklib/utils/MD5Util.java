@@ -1,4 +1,4 @@
-package com.willkernel.app.practice1.utils;
+package com.willkernel.app.wklib.utils;
 
 import android.util.Log;
 

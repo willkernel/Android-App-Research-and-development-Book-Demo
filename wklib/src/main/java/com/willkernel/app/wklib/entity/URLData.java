@@ -1,4 +1,4 @@
-package com.willkernel.app.practice1.net;
+package com.willkernel.app.wklib.entity;
 
 /**
  * Created by willkernel on 2017/7/11.
