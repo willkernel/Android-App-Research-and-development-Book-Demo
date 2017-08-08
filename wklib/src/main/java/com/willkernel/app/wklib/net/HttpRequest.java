@@ -4,6 +4,7 @@ import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.google.common.base.Strings;
 import com.willkernel.app.wklib.cache.CacheManager;
 import com.willkernel.app.wklib.entity.CacheItem;
 import com.willkernel.app.wklib.entity.URLData;
@@ -22,9 +23,15 @@ import java.net.InetAddress;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
+import java.util.zip.GZIPInputStream;
 
 /**
  * Created by willkernel on 2017/7/11.
@@ -39,6 +46,7 @@ public class HttpRequest implements Runnable {
     private Response response = new Response();
     private URLData urlData;
     private HttpURLConnection httpURLConnection;
+    private static long severAndClientTime;
 
     HttpRequest(URLData data, List<RequestParameter> parameters, RequestCallback callback) {
         urlData = data;
@@ -53,11 +61,18 @@ public class HttpRequest implements Runnable {
             Log.e(TAG, "urldata=" + urlData);
             urlData.url = sort(urlData.url);
             if (urlData.expires > 0) {
-                CacheItem cacheItem = CacheManager.getInstance().getFromCache(MD5Util.md5(urlData.url));
+                final CacheItem cacheItem = CacheManager.getInstance().getFromCache(MD5Util.md5(urlData.url));
                 Log.e(TAG, "cacheItem=" + cacheItem);
                 if (cacheItem != null && requestCallback != null) {
-                    requestCallback.onSuccess(cacheItem.data);
-                    Log.e(TAG, "cache=" + cacheItem.data);
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.e(TAG, "cache data=" + cacheItem.data);
+                            requestCallback.onSuccess(cacheItem.data);
+                            // com.alibaba.fastjson.JSONException: syntax error, expect {, actual pos 2, json
+                            // 此错误抛出是因为gzip压缩导致 ,获取输入流采用new GZIPInputStream(httpURLConnection.getInputStream());
+                        }
+                    });
                     return;
                 }
             }
@@ -76,7 +91,9 @@ public class HttpRequest implements Runnable {
         httpURLConnection.setConnectTimeout(20000);
         httpURLConnection.setReadTimeout(20000);
         httpURLConnection.setDoInput(true);
-        httpURLConnection.setRequestProperty("Content-type", "application/x-java-serialized-object");
+
+        Log.e(TAG, "RequestProperties=" + httpURLConnection.getRequestProperties());
+        setHeaders();
 
         //POST 不使用缓存
         httpURLConnection.setUseCaches(false);
@@ -92,33 +109,92 @@ public class HttpRequest implements Runnable {
         avoidHack(url);
         setCookie();
 
-        InputStream inStrm = new BufferedInputStream(httpURLConnection.getInputStream());
-        //无需回调
-        if (requestCallback == null) return;
-
-        response.result = inputStreamToString(inStrm);
-        if (response.errorType == -2) {
-            requestCallback.onCookieExpired();
-        } else {
-            if (TextUtils.isEmpty(response.result)) {
-                handleNetworkError("网络异常");
+        httpURLConnection.connect();
+        if (httpURLConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+            setSeverAndClientTime();
+            InputStream inStrm;
+//        content-encoding 带有gzip值，采用GZIPInputStream
+            String contentEncoding = httpURLConnection.getContentEncoding();
+            if (!Strings.isNullOrEmpty(contentEncoding) && contentEncoding.contains("gzip")) {
+                inStrm = new GZIPInputStream(httpURLConnection.getInputStream());
+                Log.e(TAG, "GZIPInputStream");
             } else {
-                response.errorMessage = "";
-                response.errorType = 0;
-                response.hasError = false;
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        HttpRequest.this.requestCallback
-                                .onSuccess(response.result);
-                        Log.e(TAG, "network=" + response.result);
+                inStrm = new BufferedInputStream(httpURLConnection.getInputStream());
+                Log.e(TAG, "BufferedInputStream");
+            }
+            try {
+                Log.e(TAG, "contentEncoding=" + contentEncoding);
+                Log.e(TAG, "code=" + httpURLConnection.getResponseCode());
+                Log.e(TAG, "msg=" + httpURLConnection.getResponseMessage());
+                Log.e(TAG, "HeaderFields=" + httpURLConnection.getHeaderFields());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            //无需回调
+            if (requestCallback == null) return;
+
+            response.result = inputStreamToString(inStrm);
+            if (response.errorType == -2) {
+                requestCallback.onCookieExpired();
+            } else {
+                Log.e(TAG, "code=" + httpURLConnection.getResponseCode());
+                if (TextUtils.isEmpty(response.result)) {
+                    handleNetworkError("网络异常");
+                } else {
+                    response.errorMessage = "";
+                    response.errorType = 0;
+                    response.hasError = false;
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.e(TAG, "network result=" + response.result);
+                            HttpRequest.this.requestCallback
+                                    .onSuccess(response.result);
+                        }
+                    });
+                    if (urlData.netType.equals("GET") && urlData.expires > 0) {
+                        CacheManager.getInstance().putFileCache(urlData.url, response.result, urlData.expires);
                     }
-                });
-                if (urlData.netType.equals("GET") && urlData.expires > 0) {
-                    CacheManager.getInstance().putFileCache(urlData.url, response.result, urlData.expires);
                 }
             }
+        } else {
+            Log.e(TAG, "code=" + httpURLConnection.getResponseCode());
         }
+    }
+
+    private void setHeaders() {
+//        httpURLConnection.setRequestProperty("Content-type", "application/x-java-serialized-object");
+        //浏览器通用属性 Http Header
+//        httpURLConnection.setRequestProperty("Accept", "");
+        httpURLConnection.setRequestProperty("Accept-Language", "en,zh");
+        httpURLConnection.setRequestProperty("Accept-Charset", "UTF-8,*");
+//        httpURLConnection.setRequestProperty("referrer", "");
+        httpURLConnection.setRequestProperty("User-Agent", "Android");
+        httpURLConnection.setRequestProperty("Accept-Encoding", "gzip");//压缩减小存储空间 传输时间，response 返回时会有content-encoding字段，带有gzip值，否则没有
+        httpURLConnection.setRequestProperty("Content-Type", "application/json");
+        // 设置客户端与服务连接类型
+        httpURLConnection.addRequestProperty("Connection", "Keep-Alive");
+    }
+
+    private void setSeverAndClientTime() {
+        String severDate = httpURLConnection.getHeaderField("Date");
+        Log.e(TAG, "severDate=" + severDate);
+        if (!Strings.isNullOrEmpty(severDate)) {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE,d MMM yyyy HH:mm:ss z", Locale.ENGLISH);
+            TimeZone.setDefault(TimeZone.getTimeZone("GMT+8"));
+            try {
+                Date date = simpleDateFormat.parse(severDate);
+                severAndClientTime = date.getTime() + 8 * 60 * 60 * 1000 - System.currentTimeMillis();
+                Log.e(TAG, "severAndClientTime=" + severAndClientTime);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static Date getSeverTime() {
+        return new Date(System.currentTimeMillis() + severAndClientTime);
     }
 
     //    防止刷屏，同一IP访问，设置短时间内请求次数，输入验证码等操作
@@ -132,6 +208,7 @@ public class HttpRequest implements Runnable {
         }
     }
 
+    //防止重定向
     private void avoidRedirect(URL url) {
         try {
             if (!url.getHost().equals(httpURLConnection.getURL().getHost())) {

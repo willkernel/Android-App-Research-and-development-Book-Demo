@@ -75,3 +75,11 @@ public abstract class MockService{
 2. 接口请求设置Cookie机制，获取网络连接 头部中的Set-Cookie,保存到CookieManager<br>
 3. 防止刷屏，同一IP访问，设置短时间内请求次数，输入验证码等操作<br>
 4. 防止重定向，判读域名Host
+
+#### 优化网络
+
+1. gzip压缩
+2. 设置服务端客户端时间 ，时区造成的时间差
+3. 连接网络后对响应状态的判断
+4. 设置网络请求通用头部信息
+5. [Android 浅析 HttpURLConnection](https://jasonzhong.github.io/2017/01/26/Android-%E6%B5%85%E6%9E%90-HttpURLConnection)

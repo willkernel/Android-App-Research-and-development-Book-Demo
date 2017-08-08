@@ -51,4 +51,13 @@ public class CacheItem implements Parcelable,Serializable{
             return new CacheItem[size];
         }
     };
+
+    @Override
+    public String toString() {
+        return "CacheItem{" +
+                "key='" + key + '\'' +
+                ", data='" + data + '\'' +
+                ", expires=" + expires +
+                '}';
+    }
 }

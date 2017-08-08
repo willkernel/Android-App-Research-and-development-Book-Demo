@@ -2,6 +2,7 @@ package com.willkernel.app.practice1.activity;
 
 import android.content.Intent;
 
+import com.willkernel.app.practice1.R;
 import com.willkernel.app.wklib.net.RequestCallback;
 
 
@@ -23,7 +24,7 @@ public class LoginActivity extends BActivity {
 
     @Override
     protected int getLayoutId() {
-        return 0;
+        return R.layout.activity_login;
     }
 
     @Override

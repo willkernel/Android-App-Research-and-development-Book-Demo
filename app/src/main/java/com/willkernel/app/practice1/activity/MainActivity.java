@@ -12,6 +12,7 @@ import com.alibaba.fastjson.JSON;
 import com.willkernel.app.practice1.CApp;
 import com.willkernel.app.practice1.R;
 import com.willkernel.app.practice1.entity.Weather;
+import com.willkernel.app.wklib.net.HttpRequest;
 import com.willkernel.app.wklib.net.RemoteService;
 import com.willkernel.app.wklib.net.RequestCallback;
 import com.willkernel.app.wklib.net.RequestParameter;
@@ -56,10 +57,19 @@ public class MainActivity extends BActivity {
 
             }
         });
+
+        findViewById(R.id.button_date).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.e(TAG, "Date=" + HttpRequest.getSeverTime());
+            }
+        });
     }
 
     protected void loadData() {
-        progressDialog.show();
+        if (!progressDialog.isShowing()) {
+            progressDialog.show();
+        }
         RequestCallback weatherCallback = new AbstractRequestCallback() {
 
             @Override
@@ -70,7 +80,7 @@ public class MainActivity extends BActivity {
                     Log.e(TAG, weatherinfoBean.toString());
                     textView.setText(weatherinfoBean.getCity());
                 }
-                progressDialog.dismiss();
+                progressDialog.cancel();
             }
         };
         ArrayList<RequestParameter> parameters = new ArrayList<>();
@@ -79,7 +89,7 @@ public class MainActivity extends BActivity {
         parameters.add(requestParameter1);
         parameters.add(requestParameter2);
 
-        RemoteService.getInstance().invoke(CApp.getInstance(), requestManager, "getWeatherInfo", parameters, weatherCallback, false);
+        RemoteService.getInstance().invoke(CApp.getInstance(), requestManager, "getWeatherInfo", parameters, weatherCallback, true);
     }
 
     private void loadData1() {
