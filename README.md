@@ -14,6 +14,7 @@ db SQLLite 相关逻辑的封装
 engine 业务相关类
 interfaces 接口,命名以I作为开头
 listener  基于Listener接口，命名以On作为开头
+UIL,Fresco 图片加载
 
 3. Activity新的生命周期，统一事件编程模型
 solid原则，单一职责，一个类，一个方法只做一件事
@@ -83,3 +84,49 @@ public abstract class MockService{
 3. 连接网络后对响应状态的判断
 4. 设置网络请求通用头部信息
 5. [Android 浅析 HttpURLConnection](https://jasonzhong.github.io/2017/01/26/Android-%E6%B5%85%E6%9E%90-HttpURLConnection)
+
+#### 网络流量优化
+
+- 通信层面优化 
+1. 接口返回数据进行gzip压缩,大于1KB才进行压缩,否则得不偿失<br>
+2. 通常数据传输遵行JSON,推荐新的传输协议,[ProtoBuf](https://developers.google.com/protocol-buffers/),这种协议是二进制的,表示大数据时,空间比JSON小很多<br>
+3. 解决频繁调用API问题<br>
+4. HTTP协议速度远不如TCP协议,后者是长连接,可以使用TCP提高访问速度,一台服务器支持的长连接个数不多,需要更多服务器集成<br>
+5. 建立离开页面取消网络请求机制<br>
+6. 增加重试机制,如果Mobile API 是严格RESTful风格,将获取数据的接口定义为GET,操作数据的接口定义为POST.这样就可以为所有GET请求配置重试机制,对POST请求增加防止用户1分钟内频繁发起相同请求的机制<br>
+   在APP启动时候告诉所有API接口重试次数
+   
+- 图片策略优化
+1. 图片URL加上 ?width=100&height=50
+2. 图片单独准备服务器,http://www.imagesever.com/getImage?param=(encode_value) encode_value是对图片url,width,height进行encode,服务器进行解密,对图片进行重新绘制<br>
+增加imageType(1-> 等比缩放后裁剪多余部分;2-> 等比缩放后不足的宽或者高填充白色)，有缺点，频繁读写硬盘<br>
+规定宽高,如果尺寸有出入,获取面积最接近的 s=(w1-w)^2+(h1-h)^2
+3. 低速网络下,降低图片质量,请求URL增加quality参数,节省流量
+
+- 极速模式
+发现当前网络为2G,3G或4G当前模式是正常模式,提示是否要进入极速模式以节省流量. 如果是WIFI网络,当前模式是极速模式，提示用户是否切换回正常模式，在设置页面也要提供这个开关，用户手动切换模式
+
+#### 城市列表设计
+
+1. cityId,cityName,pinyin,jianpin(全拼,简拼做字母排序和检索) 数据在不同平台的统一，便于维护，保存在本地，API获取城市列表，打开gzip压缩，增加版本号控制，及时更新，插入新的数据
+2. 增量更新机制(包括增 A,删 D ,改 E) 增加一个字段,type 判断数据是哪种情况,分别处理
+
+#### APP与HTML5
+
+1. 基本HTML，JavaScript语法,PC 服务器搭建IIS. 在Assets内置.html页面，现实中是在远程服务器上，定好协议，APP调用JS的方法名称
+```java
+<script type="text/javascript">
+ function changeColor(color){
+    doucument.body.style.backgroundColor=color;
+ }
+</script>
+
+wv.getSettings().setJavaScriptEnabled(true);
+wv.loadUrl("file:// /android_asset/104.html");
+btn.setOnClickListener(...){
+    ...
+    String color="#00eeff";
+    wv.loadUrl("javascript:changeColor('"+color+"');");
+}
+```
+2. HTML5页面操作APP方法

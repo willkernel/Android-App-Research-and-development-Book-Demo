@@ -3,12 +3,14 @@ package com.willkernel.app.practice1.activity;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
 import com.alibaba.fastjson.JSON;
+import com.facebook.drawee.view.SimpleDraweeView;
 import com.willkernel.app.practice1.CApp;
 import com.willkernel.app.practice1.R;
 import com.willkernel.app.practice1.entity.Weather;
@@ -25,6 +27,9 @@ public class MainActivity extends BActivity {
 
     @Override
     protected void initViews() {
+        Uri uri = Uri.parse("http://img.taopic.com/uploads/allimg/140320/235013-14032020515270.jpg");
+        SimpleDraweeView draweeView = (SimpleDraweeView) findViewById(R.id.my_image_view);
+        draweeView.setImageURI(uri);
         textView = (TextView) findViewById(R.id.text);
     }
 
