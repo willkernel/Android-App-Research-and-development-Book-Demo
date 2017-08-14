@@ -114,13 +114,15 @@ public abstract class MockService{
 #### APP与HTML5
 
 1. 基本HTML，JavaScript语法,PC 服务器搭建IIS. 在Assets内置.html页面，现实中是在远程服务器上，定好协议，APP调用JS的方法名称
-```java
+```html
 <script type="text/javascript">
  function changeColor(color){
     doucument.body.style.backgroundColor=color;
  }
 </script>
+```
 
+```java
 wv.getSettings().setJavaScriptEnabled(true);
 wv.loadUrl("file:// /android_asset/104.html");
 btn.setOnClickListener(...){
@@ -130,3 +132,24 @@ btn.setOnClickListener(...){
 }
 ```
 2. HTML5页面操作APP方法
+```html
+<a onclick="baobao.callAndroidMethod(100,100,'ccc',true)">CallAndroidMethod</a>
+```
+新建JSInterface1类,包括callAndroidMethod方法的实现
+```java
+class JSInterface1{
+    public void callAndroidMethod(int a,float b,String c,boolean d){
+        if(d){
+            String strMsg="-"+(a+1)+"-"+(b+1)+"-"+c+"-"+d;
+            new AlertDialog.Builder(this).setTitle("sss").setMessage(strMsg).show();
+        }
+    }
+}
+```
+注册baobao和JSInterface1对应关系
+```java
+    wv.addJavaScriptInterface(new JSInterface1(),"baobao");
+```
+在方法前加@JavascriptInterface,否则不能触发JavaScript方法
+
+3. APP,HTML之间定义跳转协议,实现HTML5活动页面,路由设置
