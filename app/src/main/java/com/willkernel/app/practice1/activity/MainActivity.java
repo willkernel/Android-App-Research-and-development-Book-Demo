@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.TextView;
 
 import com.alibaba.fastjson.JSON;
@@ -24,13 +25,14 @@ import java.util.ArrayList;
 
 public class MainActivity extends BActivity {
     private TextView textView;
-
+    private WebView webView;
     @Override
     protected void initViews() {
         Uri uri = Uri.parse("http://img.taopic.com/uploads/allimg/140320/235013-14032020515270.jpg");
         SimpleDraweeView draweeView = (SimpleDraweeView) findViewById(R.id.my_image_view);
         draweeView.setImageURI(uri);
         textView = (TextView) findViewById(R.id.text);
+        webView = (WebView) findViewById(R.id.wv);
     }
 
     @Override
@@ -41,6 +43,16 @@ public class MainActivity extends BActivity {
     @Override
     protected void setListeners() {
         loginBtn();
+        getDate();
+    }
+
+    private void getDate() {
+        findViewById(R.id.button_date).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.e(TAG, "Date=" + HttpRequest.getSeverTime());
+            }
+        });
     }
 
     private void loginBtn() {
@@ -60,13 +72,6 @@ public class MainActivity extends BActivity {
 
             private void go2News() {
 
-            }
-        });
-
-        findViewById(R.id.button_date).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.e(TAG, "Date=" + HttpRequest.getSeverTime());
             }
         });
     }
