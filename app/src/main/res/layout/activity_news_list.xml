@@ -6,4 +6,13 @@
     android:layout_height="match_parent"
     tools:context="com.willkernel.app.practice1.activity.NewsListActivity">
 
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="NewsList"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="97dp"
+        android:layout_marginLeft="76dp"
+        app:layout_constraintLeft_toLeftOf="parent" />
 </android.support.constraint.ConstraintLayout>

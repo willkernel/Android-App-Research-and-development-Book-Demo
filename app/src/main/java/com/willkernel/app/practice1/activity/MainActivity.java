@@ -1,12 +1,15 @@
 package com.willkernel.app.practice1.activity;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.widget.TextView;
 
@@ -26,6 +29,8 @@ import java.util.ArrayList;
 public class MainActivity extends BActivity {
     private TextView textView;
     private WebView webView;
+
+    @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void initViews() {
         Uri uri = Uri.parse("http://img.taopic.com/uploads/allimg/140320/235013-14032020515270.jpg");
@@ -33,6 +38,10 @@ public class MainActivity extends BActivity {
         draweeView.setImageURI(uri);
         textView = (TextView) findViewById(R.id.text);
         webView = (WebView) findViewById(R.id.wv);
+        webView.getSettings().setJavaScriptEnabled(true);
+//        webView.loadUrl("file:///android_asset/101.html");
+        webView.loadUrl("file:///android_asset/103.html");
+//        webView.loadUrl("file:///android_asset/104.html");
     }
 
     @Override
@@ -40,10 +49,19 @@ public class MainActivity extends BActivity {
         return R.layout.activity_main;
     }
 
+    @SuppressLint("JavascriptInterface")
     @Override
     protected void setListeners() {
         loginBtn();
         getDate();
+        webView.addJavascriptInterface(new JSInterface1(), "baobao");
+        textView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                String color = "#ffee00";
+                webView.loadUrl("javascript: changeColor ('" + color + "');");
+            }
+        }, 2000);
     }
 
     private void getDate() {
@@ -132,6 +150,26 @@ public class MainActivity extends BActivity {
                     loadData();
                 }
             }, 2000);
+        }
+    }
+
+    /**
+     * Uncaught TypeError: baobao.call Android Method is not a function
+     * solved by https://stackoverflow.com/questions/30295226/open-an-activity-window-in-android-webview-passing-a-string-in-javascript
+     * add @JavascriptInterface annotation above every method
+     */
+    class JSInterface1 {
+        @JavascriptInterface
+        public void callAndroidMethod(int a, float b, String c, boolean d) {
+            if (d) {
+                String strMsg = "-" + (a + 1) + "-" + (b + 1) + "-" + c + "-" + d;
+                new AlertDialog.Builder(MainActivity.this).setMessage(strMsg).show();
+            }
+        }
+
+        @JavascriptInterface
+        public void gotoAnyWhere(String url) {
+            gotoAnyWhere2(webView, url);
         }
     }
 }

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<url>
+    <Node
+        Key="gotoPersonCenter"
+        Target="com.willkernel.app.practice1.activity.PersonCenterActivity" />
+
+    <Node
+        Key="gotoMovieDetail"
+        Target="com.willkernel.app.practice1.activity.MovieDetailActivity" />
+
+    <Node
+        Key="gotoMovieDetail:movieId=(int)123"
+        Target="com.willkernel.app.practice1.activity.MovieDetailActivity" />
+
+    <Node
+        Key="gotoNewsList"
+        Target="com.willkernel.app.practice1.activity.NewsListActivity" />
+</url>
+

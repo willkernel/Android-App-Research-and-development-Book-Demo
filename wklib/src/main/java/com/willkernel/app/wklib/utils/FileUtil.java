@@ -1,13 +1,17 @@
 package com.willkernel.app.wklib.utils;
 
+import android.content.Context;
+import android.os.Build;
 import android.os.Environment;
 import android.os.StatFs;
 import android.util.Log;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
@@ -27,11 +31,20 @@ public class FileUtil {
         long size = Environment.getExternalStorageDirectory().getTotalSpace();
         String str = Environment.getExternalStorageDirectory().getPath();
         StatFs statFs = new StatFs(str);
-        long blockSize = statFs.getBlockSizeLong();
+        long blockSize = 0;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            blockSize = statFs.getBlockSizeLong();
+        }
         Log.e(TAG, "size=" + size);
-        Log.e(TAG, "getTotalBytes=" + statFs.getTotalBytes());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            Log.e(TAG, "getTotalBytes=" + statFs.getTotalBytes());
+        }
         Log.e(TAG, "blockSize*statFs.getAvailableBlocksLong()=" + size);
-        return blockSize * statFs.getAvailableBlocksLong();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            return blockSize * statFs.getAvailableBlocksLong();
+        } else {
+            return Environment.getExternalStorageDirectory().getFreeSpace();
+        }
     }
 
     public static void saveObject(String path, Object object) {
@@ -78,5 +91,21 @@ public class FileUtil {
         }
         Log.e(TAG, "obj=" + object);
         return object;
+    }
+
+    public static String getFromAssets(Context context, String fileName) {
+        try {
+            InputStreamReader inputStreamReader = new InputStreamReader(context.getAssets().open(fileName));
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            String line;
+            StringBuilder result = new StringBuilder();
+            while ((line = bufferedReader.readLine()) != null) {
+                result.append(line);
+            }
+            return result.toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
