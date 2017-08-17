@@ -18,7 +18,8 @@ public class CacheManager {
     private static final String TAG = "CacheManager";
     private static final long SDCARD_MIN_SPACE = 1024 * 1024 * 10;
     private static CacheManager mInstance;
-    private String cachePath = (!FileUtil.isExternalStorageWritable() ? WKApp.getInstance().getCacheDir() : WKApp.getInstance().getExternalCacheDir()).getAbsolutePath() + "/data/";
+    @SuppressWarnings("ConstantConditions")
+    public static final String cachePath = (!FileUtil.isExternalStorageWritable() ? WKApp.getInstance().getCacheDir() : WKApp.getInstance().getExternalCacheDir()).getAbsolutePath() + "/data/";
     private File cacheFile;
 
     public static CacheManager getInstance() {

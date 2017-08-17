@@ -90,6 +90,9 @@ public abstract class MockService{
 - 通信层面优化 
 1. 接口返回数据进行gzip压缩,大于1KB才进行压缩,否则得不偿失<br>
 2. 通常数据传输遵行JSON,推荐新的传输协议,[ProtoBuf](https://developers.google.com/protocol-buffers/),这种协议是二进制的,表示大数据时,空间比JSON小很多<br>
+Protocol Buffers 及[Nano-Proto-Buffers](https://github.com/nanopb/nanopb)
+Protocol Buffers是Google设计的语言无关、平台无关的一种轻便高效的序列化结构数据存数格式，类似XML，但更小、更快、更简单、很适合做数据存储或者RPC数据交换的格式。它可用于通讯协议，数据存储等领域的与语言无关、平台无关，可扩展的序列化结构数据格式。
+在移动端应该使用Nano-Proto-Buffers版本。因为普通的Protocol Buffers会生成非常冗长的代码，可能会增加APP内存占用，导致APK体积增长、性能下降，不注意的话，会很快遇到64K方法数限制问题。
 3. 解决频繁调用API问题<br>
 4. HTTP协议速度远不如TCP协议,后者是长连接,可以使用TCP提高访问速度,一台服务器支持的长连接个数不多,需要更多服务器集成<br>
 5. 建立离开页面取消网络请求机制<br>
@@ -153,3 +156,19 @@ class JSInterface1{
 在方法前加@JavascriptInterface,否则不能触发JavaScript方法
 
 3. APP,HTML之间定义跳转协议,实现HTML5活动页面,路由设置
+
+#### 全局变量序列化
+1. GlobalVariables implements Parcelable,Cloneable
+2. 序列化本地文件缺点
+  - 每次都要重新执行序列化操作
+  - 序列化文件会因内存不够数据丢失
+  - Android 提供的数据类型并不全部支持序列化(支持：Y;不支持：N)
+  
+  | 类型        | 是否支持           |
+  | ------------- |:-------------:| 
+  |简单类型int,String,Boolean    | Y|
+  | int[],int[][], String[],String[][],Boolean[] | Y|
+  | ArrayList   | Y|
+  | Calendar   | Y|
+  | JSONObject  | N|
+  | JSONArray   | N|
