@@ -172,3 +172,27 @@ class JSInterface1{
   | Calendar   | Y|
   | JSONObject  | N|
   | JSONArray   | N|
+  
+#### 命名与编码规范
+1. Java类文件
+- Activity:PersonActivity
+- Adapter:PersonAdapter
+- Entity/Bean:PersonEntity/PersonBean
+2. 资源文件
+- act_person_addcustomer.xml
+- item_lv_userlist.xml
+- 一个页面使用资源，以页面名称做前缀
+- 一个模块下多个页面使用，以模块为前缀
+- 各个模块通用，common 作为前缀
+- strings.xml 分模块 strings_module_a.xml
+3. 编码规范
+- font_size_s ,font_size_l ,font_size_xxl ,font_color_red,person_btnLogin_text
+- offset_2dp,offset_4dp
+- 使用style
+- 不要内部嵌套类
+- 不同模块实体类不共用
+- 安全数据类型转换
+- 尽量使用ApplicationContext代替Context
+- 使用常量代替枚举
+- 复杂数据保存到本地
+- [CheckStyle](http://checkstyle.sourceforge.net/)
