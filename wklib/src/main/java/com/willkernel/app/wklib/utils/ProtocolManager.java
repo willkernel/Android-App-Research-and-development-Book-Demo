@@ -1,6 +1,6 @@
 package com.willkernel.app.wklib.utils;
 
-import android.app.Activity;
+import android.content.Context;
 import android.content.res.XmlResourceParser;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -14,9 +14,9 @@ import java.io.IOException;
  */
 
 public class ProtocolManager {
-    public static ProtocolData findProtocol(String findKey, Activity activity, int id) {
+    public static ProtocolData findProtocol(String findKey, Context context, int id) {
         ProtocolData findProtocol = null;
-        XmlResourceParser xmlResourceParser = activity.getResources().getXml(id);
+        XmlResourceParser xmlResourceParser = context.getResources().getXml(id);
         try {
             int eventCode = xmlResourceParser.getEventType();
             while (eventCode != XmlPullParser.END_DOCUMENT) {

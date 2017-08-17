@@ -1,5 +1,6 @@
 package com.willkernel.app.practice1.activity;
 
+import android.util.Log;
 import android.webkit.WebView;
 
 import com.willkernel.app.practice1.R;
@@ -28,7 +29,7 @@ public class MovieDetailActivity extends BActivity {
         String data_template = FileUtil.getFromAssets(this, "data1_template.html");
         StringBuilder content = new StringBuilder();
 
-        List<MovieInfo> movieInfoList = organizeMovieList();
+        List<MovieInfo> movieInfoList = setMovieList();
         for (MovieInfo movieInfo : movieInfoList) {
             String rowData = data_template.replace("<name/>", movieInfo.name).replace("<price/>", movieInfo.price);
             content.append(rowData);
@@ -38,7 +39,11 @@ public class MovieDetailActivity extends BActivity {
         wvAds.loadData(htmlData, "text/html", "utf-8");
     }
 
-    private List<MovieInfo> organizeMovieList() {
+    private List<MovieInfo> setMovieList() {
+        int movieId=getIntent().getIntExtra("movieId",0);
+        String movieName=getIntent().getStringExtra("movieName");
+        Log.e(TAG,"movieId="+movieId);
+        Log.e(TAG,"movieName="+movieName);
         ArrayList<MovieInfo> movieList = new ArrayList<>();
         movieList.add(new MovieInfo("Movie 1", "120"));
         movieList.add(new MovieInfo("Movie B", "80"));

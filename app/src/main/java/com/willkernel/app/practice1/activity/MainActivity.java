@@ -23,6 +23,7 @@ import com.willkernel.app.wklib.net.RemoteService;
 import com.willkernel.app.wklib.net.RequestCallback;
 import com.willkernel.app.wklib.net.RequestParameter;
 import com.willkernel.app.wklib.net.request.RequestAsyncTask;
+import com.willkernel.app.wklib.utils.Dispatcher;
 
 import java.util.ArrayList;
 
@@ -158,7 +159,7 @@ public class MainActivity extends BActivity {
      * solved by https://stackoverflow.com/questions/30295226/open-an-activity-window-in-android-webview-passing-a-string-in-javascript
      * add @JavascriptInterface annotation above every method
      */
-    class JSInterface1 {
+    private class JSInterface1 {
         @JavascriptInterface
         public void callAndroidMethod(int a, float b, String c, boolean d) {
             if (d) {
@@ -169,7 +170,9 @@ public class MainActivity extends BActivity {
 
         @JavascriptInterface
         public void gotoAnyWhere(String url) {
-            gotoAnyWhere2(webView, url);
+            Log.e(TAG, "gotoUrl=" + url);
+            Dispatcher.gotoAnyWhereByProtocol(MainActivity.this,url,R.xml.protocol);
+//            gotoAnyWhere2(webView, url);
         }
     }
 }
