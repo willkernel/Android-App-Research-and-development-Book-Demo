@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="offset_8dp">8dp</dimen>
+    <dimen name="font_size_m">14sp</dimen>
+    <dimen name="radius_4dp">4dp</dimen>
+</resources>

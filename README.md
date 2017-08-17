@@ -196,3 +196,29 @@ class JSInterface1{
 - 使用常量代替枚举
 - 复杂数据保存到本地
 - [CheckStyle](http://checkstyle.sourceforge.net/)
+
+#### Crash异常收集与统计,分析
+1. CrashHandler implements UncaughtExceptionHandler
+2. 异常数据表结构
+
+  | 字段        | 描述           |
+  | ------------- |:-------------:| 
+  |id    | 自增id|
+  |client_type    | Crash所在app |
+  |page_name    | Crash所在Activity |
+  |exception_name    | Crash所在Activity |
+  |exception_stack    | Crash详细信息 |
+  |crash_type    | 1 崩溃，0 try-catch |
+  |app_version    |app 版本 |
+  |os_version    |Android 系统版本 |
+  |device_model    |Android 手机型号 |
+  |device_id    |Android 手机设备号 |
+  |network_type    | 网络类型 |
+  |channel_id    | 渠道号 |
+  |client_type    | Android/iPhone |
+  |memory_info    | 内存使用情况 |
+  |crash_time    | 发生时间,数据库自动生成 |
+ 3. 统计，去重(数字，行号，相同信息，页面，截取前面的info)，新增规则，去除昨天重复，新增今日不同Crash，按照pageOwner 分配给不同的人，建表，执行SQL脚本，C#程序，做成自动化执行脚本
+ 归纳详细信息，即时性，查询Crash，趋势图
+ 4. 分析
+ 

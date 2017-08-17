@@ -105,4 +105,8 @@ public class WKApp extends MultiDexApplication {
     public static WKApp getInstance() {
         return instance;
     }
+
+    public static Context getContext() {
+        return instance.getApplicationContext();
+    }
 }

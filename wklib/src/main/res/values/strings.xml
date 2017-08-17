@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">WKLib</string>
+    <string name="app_crash">app crash</string>
 </resources>
