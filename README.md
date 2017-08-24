@@ -220,5 +220,56 @@ class JSInterface1{
   |crash_time    | 发生时间,数据库自动生成 |
  3. 统计，去重(数字，行号，相同信息，页面，截取前面的info)，新增规则，去除昨天重复，新增今日不同Crash，按照pageOwner 分配给不同的人，建表，执行SQL脚本，C#程序，做成自动化执行脚本
  归纳详细信息，即时性，查询Crash，趋势图
- 4. 分析
- 
+ 4. 分析<br>
+ - Android系统碎片化
+ - MobileAPI 返回了脏数据
+ - 混淆Keep,找不到类或方法Crash
+ - unknown source:执行javac时丢失了文件名和行号
+ ```java
+    <javac debug="true" debuglevel="source,lines".../>
+ ```
+  - unknown source:执行混淆时时丢失了文件名和行号
+  ```java
+  ProGuard
+     -keepattributes SourceFile.LineNumeberTable
+     
+  ```
+   - 测试版本包,渠道号区分开
+   
+5. Java语法相关异常
+- NPE: 对参数，返回数据判空，避免过多使用全局变量
+- IndexOutOfBoundsExceptions,StringIOBE,ArrayIOBE,String.subString(),ListView操作不当: 数组、集合为空，长度，取值下标不存在
+- invoke virtual method on a null object reference: 对象为空，实例化对象回收为空
+- ClassCastException: 类型转换函数，转换时返回默认值
+- NumberFormatException: 数据类型转换，服务器返回数据类型错误，转换失败返回默认值
+- NegativeArraySizeException: 数组大小为负值异常
+- ConcurrentModificationException: 遍历集合同时，删除元素，多线程删除同一个集合，使用并发库线程安全集合类
+- Comparison method violates its general contract: 比较器使用不当，对自定义比较器进行单元测试，返回-1,1,0
+- ArithmeticException: 除数为0,GifView 中movie的duration如果为0，会抛出此异常，设置默认值1
+- UnsupportedOperationException,List.remove(),Collection.remove(): Arrays.asList() 返回Arrays$ArrayList 此类没有实现add() remove();
+- ClassNotFoundException: Class.forName("com.aaa.bbb"),找不到此类,混淆造成类名改变,类似的有 ClassLoader.findSystemClass("name")或者loadClass()
+- NoClassDeFoundError: A,B 两个类位于不同的dex中，如果A类所在dex中被删除，运行时就会抛出此异常，通常由于插件化编程造成的异常，因为要使用DexClassLoader,或者第三方SDK
+
+6. 四大组件相关异常
+- ActivityNotFoundExc: No Activity found to handle intent原因是url不是以http开头的，或者打开SD卡上HTML页面时，没有为intent指定浏览器
+ ```java
+ intent=new Intent(Intent.Action_View,Uri.parse("file:///sdcard/101.html"))
+ intent.setClassName("com.android.provider","com.android.browser.BrowserActivity")
+  ```
+调用第三方APK，未安装造成的异常
+- RE,Unable to instantiate activity ComponentInfo: 没有注册Activity
+- RE,Unable to instantiate receiver： 检查Manifest.xml,混淆所造成额名称错误
+- Unable to start receiver : startActivity  intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+- Failure delivering result ResultInfo:StartActivityForResult() 返回数据异常造成
+- Fragment not attached to activity: Fragment 没有attach to activity,调用getResources(),判读isAdded()
+
+7. 序列化异常
+- Parcelable encountered IOExc writing serializable object(name=xxx)..: JSONObj,JSONAry 不支持序列化，成员变量不支持序列化
+- BadParcelableExc ClassNotFoundExc when unmarshalling:未指定ClassLoader
+> ClassLoader为空时，系统会采取默认的ClassLoader
+> Android ClassLoader: frameworkLoader(加载Android系统内部的类),apk ClassLoader(加载自定义的类，系统的类)
+> APP启动时，默认ClassLoader是apk ClassLoader,系统内存不足应用被回收再次启动时会再次启动，这个默认ClassLoader会变为framework ClassLoader
+> 所以对于我们自己的类会抛出ClassNotFoundExc.
+- Parcelable encountered IOExc reading serializable object: ProGuard 对于Class.forName(class) 中的class不起作用，反序列化时找不到类，相应解决办法是-keep class
+- Parcelable encountered IOExc writing serializable object： app使用getSerializableExtra()没有做异常判断,反序列化时传入畸形数据，导致本地拒绝服务，传入Integer抛出ClassCastExc,传入自定义可序列化对象 ClassNotFoundExc
+- Could not read input channel file descriptors from parcel: Intent 传的数据太大，或者FileDescriptor过多没有关闭，looper太多没有退出
