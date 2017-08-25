@@ -273,3 +273,5 @@ class JSInterface1{
 - Parcelable encountered IOExc reading serializable object: ProGuard 对于Class.forName(class) 中的class不起作用，反序列化时找不到类，相应解决办法是-keep class
 - Parcelable encountered IOExc writing serializable object： app使用getSerializableExtra()没有做异常判断,反序列化时传入畸形数据，导致本地拒绝服务，传入Integer抛出ClassCastExc,传入自定义可序列化对象 ClassNotFoundExc
 - Could not read input channel file descriptors from parcel: Intent 传的数据太大，或者FileDescriptor过多没有关闭，looper太多没有退出
+
+8. 列表相关异常
