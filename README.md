@@ -275,3 +275,238 @@ class JSInterface1{
 - Could not read input channel file descriptors from parcel: Intent 传的数据太大，或者FileDescriptor过多没有关闭，looper太多没有退出
 
 8. 列表相关异常
+- ListView IllegalStateException: “The content of the adapter has changed but ListView did not receive a notification”
+Make sure the content of your adapter is not modified from a background thread , but only from the UI thread
+> Activity.runOnUiThread()
+> 调用Handler，通知主线程修改adapter
+> 确保列表同步更新，调用notifyDataSetChanged()
+- 滚动时点击刷新按钮，崩溃. IndexOutOfBoundsExc,throwIndexOutOfBoundsExc,ArrayList.get() at HeaderViewListAdapter.getView()
+> 滚动时获取getCounts()=30,getView()方法中，当数据清空size=1(HeaderViewListAdapter),Invalid index 30. 
+> 解决方法是滚动时设置刷新按钮不可点击
+- AbsListView 的obtainView 返回空指针：NPE,AbsListView.obtain View at ListView.makeAndAddView
+> obtainView获取不到view，getView()方法返回null，判断getView返回值为null时，返回convertView，ConvertView不为空
+- Adapter数据源变化但是没调用notifyDataSetChanged:在初始化viewpager时，先初始化adapter的数据，再传给viewpager,
+如果不这样处理，更新adapter内容后调用notifyDataSetChanged
+
+9. 窗体相关异常(dismiss 对话框的时候，activity已经不存在)
+- Activity has leaked window that was originally added here: activity finish() 后dialog 还存在，窗口句柄泄露，未能及时销毁，在OnDestroy()中 dismiss dialog
+- View not attache to window manager: 在耗时任务开始时，显示一个对话框，当任务完成销毁对话框，如果在此期间，
+activity被销毁重启，dismiss的时候WindowManager发现Dialog 所属activity不存在，所以会报View not attached to windowManager.
+>不要在非UI线程使用对话框，activity有相应对话框回调：onCreateDialog(),showDialog(),dismissDialog(),removeDialog() is deprecated，使用DialogFragment代替
+>Dialog对象在Activity可控范围之内和生命周期内，可以override dismiss(),在dismiss之前，判断activity是否存在
+>窗体在不恰当的时候获取了焦点：NPE， PopupWindow$PopupViewContainer.dispatchKeyEvent,原因popupWindow在显示之前，
+就获取了焦点，导致crash，4.0对这类问题进行规避，2.3兼容，在showAtLocation()后调用setFocusable(true),dismiss后调用setFocusable(false),setFocusable()为了让控件实现监听
+>Unable to add window-- token null is not for an application: Context 不正确，Dialog.Builder(getApplicationContext()) 是错误的，应该是Activity.
+>Permission denied for this window type:BadTokenExc.  在使用WindowManager.LayoutParams.TYPE_SYSTEM_ALERT 涉及window type 权限，没有设置权限
+添加  系统窗口<uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>显示在其他应用顶部,屏幕顶部<uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW"/>窗体覆盖在window
+>BadTokenExc,is your activity running: activity不存在了，或者在onCreate()中，显示popupWindow，因为需要parent，依附于activity
+- Adding window failed: Crash 在Android源码，ViewRoot的setView方法中
+- NPE,AlertDialog.resolveDialogTheme: Activity A 调用 Activity B 的dialog.show(),解决方法，
+通知对话框工具类，BActivity;TabActivity中切换tab时Crash，设置dialog.show(getParent())为父级Activity
+- The specified child already has a parent,you must call removeView() on the child's parent first:
+ imageView 在LinearLayout parent中,onCreate()方法setContentView(imageView)会Crash，
+ 必须先parent.removeView(child),再设置setContentView(child)
+- 子线程不能修改UI,操作AlertDialog,Toast：Cant't create handler inside that has not called Looper.prepare(),
+ ViewRootImpl 中checkThread() Crash,解决办法handler,runOnUiThread(),Looper.getMainLooper(),或者是Looper.prepare(),Looper.loop()
+```java
+    @Override
+    public void requestFitSystemWindows() {
+        checkThread();
+        mApplyInsetsRequested = true;
+        scheduleTraversals();
+    }
+
+    @Override
+    public void requestLayout() {
+        if (!mHandlingLayoutInLayoutRequest) {
+            checkThread();
+            mLayoutRequested = true;
+            scheduleTraversals();
+        }
+    }
+    
+    void checkThread() {
+        if (mThread != Thread.currentThread()) {
+            throw new CalledFromWrongThreadException(
+                    "Only the original thread that created a view hierarchy can touch its views.");
+        }
+    }
+```
+- Resources$NotFoundExc,id错误,找不到正确的res
+- StackOverflowError：布局嵌套太多，不要超过5层，移除不必要视图，app退出时，有多个线程未关闭，需要使用System.exit(0),无论是那种情况，都是由于无限递归,JVM中有个栈，预设了一个深度，超出就会Crash
+- UnsatisfiedLinkedError: so格式文件没有加载到，检查libs目录文件
+> CPU指令集，armeabi,armeabi-v7a,mips,x86.armeabi,v7a的so数量不一致，典型会导致此Crash
+- InflateExc
+> FileNotFoundExc:Activity销毁，涉及的资源没有被回收，产生内存泄漏，找不到这个资源
+> InflateExc,缺少构造器，super(context,attributeSet)
+> InflateExc style和android:textStyle 的区别
+- TransactionTooLargeExc,Binder最大限制为1M，大于1M就会Crash，不要将大量数据传入Binder，比如说图片
+
+10. 系统碎片化相关Crash
+- NoSuchMethodError,SDK版本不一致造成，deprecated方法,Android Lint 检查，版本判断
+- RemoteViews,使用在Appwidget ,Notification,当绑定Notification时，Bitmap为null，String为""或null，版本为4.0时Crash，在4.1以上并不会导致程序崩溃
+- PointIndex out of range: IllegalArgumentExc,由于Android系统原因导致的，简单有效办法是在绘图时捕获这个异常,
+重写View的OnInterceptTouchEvent,OnTouchEvent,增加try...catch,如果是ViewPager，OnInterceptTouchEvent返回false，导致ViewPager翻页出现bug
+- SecurityExc
+> Intent 图片数据太大
+> 动态加载其他APK，通过ContextHolder注册BroadcastReceiver,把APK重新部署即可
+> NoPermission to modify thread,ROM禁止这些权限，判断权限，PackageManager.checkPermission(...PackageManager.PERMISSION_GRANTED)
+- View的getDrawingCache()返回null,NPE,当图片太大，超出Cache大小Crash
+```java
+         public void buildDrawingCache(boolean autoScale) {
+            if ((mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == 0 || (autoScale ?
+                    mDrawingCache == null : mUnscaledDrawingCache == null)) {
+                if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                    Trace.traceBegin(Trace.TRACE_TAG_VIEW,
+                            "buildDrawingCache/SW Layer for " + getClass().getSimpleName());
+                }
+                try {
+                    buildDrawingCacheImpl(autoScale);
+                } finally {
+                    Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+                }
+            }
+         }
+    
+        /**
+         * private, internal implementation of buildDrawingCache, used to enable tracing
+         */
+        private void buildDrawingCacheImpl(boolean autoScale) {
+            mCachingFailed = false;
+    
+            int width = mRight - mLeft;
+            int height = mBottom - mTop;
+    
+            final AttachInfo attachInfo = mAttachInfo;
+            final boolean scalingRequired = attachInfo != null && attachInfo.mScalingRequired;
+    
+            if (autoScale && scalingRequired) {
+                width = (int) ((width * attachInfo.mApplicationScale) + 0.5f);
+                height = (int) ((height * attachInfo.mApplicationScale) + 0.5f);
+            }
+    
+            final int drawingCacheBackgroundColor = mDrawingCacheBackgroundColor;
+            final boolean opaque = drawingCacheBackgroundColor != 0 || isOpaque();
+            final boolean use32BitCache = attachInfo != null && attachInfo.mUse32BitDrawingCache;
+    
+            final long projectedBitmapSize = width * height * (opaque && !use32BitCache ? 2 : 4);
+            final long drawingCacheSize =
+                    ViewConfiguration.get(mContext).getScaledMaximumDrawingCacheSize();
+                    
+       >>>  if (width <= 0 || height <= 0 || projectedBitmapSize > drawingCacheSize) {
+                if (width > 0 && height > 0) {
+                    Log.w(VIEW_LOG_TAG, getClass().getSimpleName() + " not displayed because it is"
+                            + " too large to fit into a software layer (or drawing cache), needs "
+                            + projectedBitmapSize + " bytes, only "
+                            + drawingCacheSize + " available");
+                }
+                destroyDrawingCache();
+                mCachingFailed = true;
+                return;
+            }
+            ……
+        }
+```
+- DeadObjectException - The object you are calling has died, because its hosting process no longer exists.
+- Android 2.1不支持SSL,判断版本不支持操作
+- Android 2.2不支持xlargeScreen,添加2.3(API 9)
+- ViewFlipper,Receiver not registered: 横竖屏切换造成，因为OnDetachedFromWindow()在onAttachedToWindow()之前别调用所致，
+重写ViewFlipper的onDetachedFromWindow()
+```java
+protected void onDetachedFromWindow(){
+    try{
+        super.OnDetachedFromWindow()
+    }catch{
+        stopFlipping();
+    }
+}
+```
+- ActivityNotFoundExc,WirelessSettings,4.0以上把打开网络设置方式舍弃了
+```java
+if(Builder.Version.SDK_INT>13){
+startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
+}else{
+startActivity(new Intent(android.provider.Settings.ACTION_WIRELESS_SETTINGS));
+}
+```
+- PackageManage has died,try...catch
+- SpannableString 富文本，IOBE,setSpan,某些Android系统对于getSelectionStart()会返回-1，这样就会Crash,判断是否为-1
+- Can not perform this action after onSaveInstance(), commit 方法在Activity 的OnSaveInstanceState()之后会出错，Activity保存完状态后再添加Fragment
+会出错，commitAllowingStateLoss()
+- Service intent must be explicit,显示启动service,指定Component或者package
+
+11. SQLite相关异常
+- NoTransaction is active,逐条循环插入大量数据时，会Crash，一条语句是一个事务，采用批量插入语法，一次性插入数据库
+db.setTransaction() 在这个方法执行前，所有的execSql()都不会更新到数据库，等这个方法执行完后会一次性把所有的执行完
+- 忘记关闭Cursor，内存泄漏，手动关闭Cursor.close();
+- 数据库被锁定，不同线程创建多个连接会Crash，解决办法是把数据库做成单列，对于多进程APP，需要ContentProvider
+- 试图打开已关闭对象，不同线程同事操作数据库，当前聊天室一直打开数据库，在退出时再close()
+- 文件加密了，或无数据库，SQLiteDatabaseCorruptExc,file is encrypted or is not a database:注意DB文件版本，
+统一成一个版本，APP安装在SD卡上，多次插拔就会导致文件破损
+- WebView缓存导致的崩溃，多线程操作增删数据Crash， SQLiteDiskIOExc,WebViewDataBase,使用了webview缓存技术
+> Webview两种缓存：网页数据缓存，存储打开过的页面及资源，Html5缓存，aapcache
+> url 保存在webviewCache文件夹下，对于webview.db ,webviewCache.db 自动生成一个android_metadata 表，
+只要创建SQLite数据库中的表，就会自动创建这个表，只有一个local字段，存放的是en-US ,zh-CN
+- android_metadata表不存在，no such table
+```java
+SQLiteDatabase db=SQLiteDatabase.openDatabase(PATH,null,SQLiteDatabase.OPEN_READONLY);
+改为
+SQLiteDatabase db=SQLiteDatabase.openDatabase(PATH,null,SQLiteDatabase.NO_LOCALIZED_COLLATORS);
+```
+
+12. 其他异常
+- OOM ,android:largeHeap="true",官方说减少内存使用， 使用回收和复用的方法
+- TimeOutExc,GC回收时抛出异常，重写finalize,不要有超时操作
+- JSONExc,使用optString(),optJsonArray(),new JSONArray(jsonString) jsonString为空时crash
+- 第三方SDK crash
+- views has same id
+- LayoutInflater.from().inflate()使用不当导致的崩溃，应该在当前使用的子类中实例化
+- ViewGroup ，parameter must be a descent of this view,保证当前view获取焦点
+```java
+    /**
+     * Helper method that offsets a rect either from parent to descendant or
+     * descendant to parent.
+     */
+    void offsetRectBetweenParentAndChild(View descendant, Rect rect,
+            boolean offsetFromChildToParent, boolean clipToBounds) {
+        // now that we are up to this view, need to offset one more time
+        // to get into our coordinate space
+        if (theParent == this) {
+            if (offsetFromChildToParent) {
+                rect.offset(descendant.mLeft - descendant.mScrollX,
+                        descendant.mTop - descendant.mScrollY);
+            } else {
+                rect.offset(descendant.mScrollX - descendant.mLeft,
+                        descendant.mScrollY - descendant.mTop);
+            }
+        } else {
+            throw new IllegalArgumentException("parameter must be a descendant of this view");
+        }
+    }
+```
+- Monkey点击过快导致的崩溃，点击事件加延迟函数
+```java
+public boolean isWindowLocked(){
+    long current=SystemClock.elapseRealTime();
+    if(current-mLastOnClickTime>500){
+        mLastOnClickTime=curretn;
+        return false;
+    }
+    return true;
+}
+```
+- 图片缩放很多倍，内存溢出Crash，多发生全屏显示一张图片,try..catch
+```java
+   /**
+     * Postconcats the matrix with the specified scale.
+     * M' = S(sx, sy) * M
+     */
+    public boolean postScale(float sx, float sy) {
+        native_postScale(native_instance, sx, sy);
+        return true;
+    }
+```
+- 图片宽高为0，try-catch
+- 不能重复添加组件
+> try-catch WindowManager.removeView
+> try-catch WindowManager.addView
