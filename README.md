@@ -1,4 +1,4 @@
-# Practice
+# App
 #### AndroidLib
 
 1. 业务无关公用代码
@@ -518,3 +518,5 @@ public boolean isWindowLocked(){
 - View xxx has already been added to the window manager ,不能重复添加组件
 > try-catch WindowManager.removeView
 > try-catch WindowManager.addView
+
+#### Proguard
