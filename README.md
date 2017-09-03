@@ -495,8 +495,16 @@ public boolean isWindowLocked(){
     return true;
 }
 ```
-- 图片缩放很多倍，内存溢出Crash，多发生全屏显示一张图片,try..catch
+- IllegalArgumentsExc:bitmap size exceeds 32bits,图片缩放很多倍，内存溢出Crash，多发生全屏显示一张图片,try..catch
 ```java
+//srcW ,srcH 缩放前
+//targetW,targetH 缩放后
+   public void scale(){
+      float scaleW=targetW/srcW;
+      float scaleH=targetH/srcH;
+      Matrix matrix=new Matrix();
+      matrix.postScale(scaleW,scaleH);
+   }
    /**
      * Postconcats the matrix with the specified scale.
      * M' = S(sx, sy) * M
@@ -506,7 +514,7 @@ public boolean isWindowLocked(){
         return true;
     }
 ```
-- 图片宽高为0，try-catch
-- 不能重复添加组件
+- 没有加载到图片，或者缓存数据被清空，提前调用了获取图片宽高的方法，图片宽高为0，try-catch
+- View xxx has already been added to the window manager ,不能重复添加组件
 > try-catch WindowManager.removeView
 > try-catch WindowManager.addView
